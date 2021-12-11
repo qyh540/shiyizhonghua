@@ -95,13 +95,15 @@ public class UserServiceImpl implements UserService {
         wrapper.eq("username", loginDto.getUsername());
         User user = userRepository.selectOne(wrapper);
 
+        if (user == null){
+            return Result.noUser();
+        }
+
         //判断用户密码+salt 经过md5加密后是否与user记录相同
         String encryPass = DigestUtils.md5DigestAsHex((loginDto.getPassword() + user.getSalt()).getBytes());
         System.out.println("md5Pass:" + encryPass);
 
-        if (user == null) {
-            return Result.noUser();
-        } else if ((encryPass.equals(user.getPassword()))) {
+        if ((encryPass.equals(user.getPassword()))) {
             return Result.success(user);
         } else if (!(encryPass.equals(user.getPassword()))) {
             return Result.wrongPass();
@@ -142,7 +144,7 @@ public class UserServiceImpl implements UserService {
         }
         //创建用户
         User user = userServiceImpl.createUser(id, username, nickname, salt, md5Pass);
-        //System.out.println("user:====" + user);
+
         if(user != null){
             return Result.registerSuccess(user);
         }
